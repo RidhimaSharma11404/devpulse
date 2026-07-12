@@ -1,0 +1,28 @@
+# Maven target directory
+target/
+
+# Local Maven binaries download
+.maven/
+
+# Temp folder used for sandbox compiles
+temp/
+
+# SQLite databases
+*.db
+*.db-journal
+
+# IDEs and editors configurations
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# Log files
+*.log
