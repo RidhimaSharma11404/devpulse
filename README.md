@@ -18,7 +18,7 @@ DevPulse is a state-of-the-art, cloud-native Java Full-Stack developer telemetry
 
 ## 🔗 Live Application Link
 
-* **Live Cloud Deployment**: [Launch DevPulse on Render](https://devpulse-ridhimasharma.onrender.com) *(Or your specific Render URL)*
+* **Live Cloud Deployment**: [Launch DevPulse on Render](https://devpulse-4ir6.onrender.com/)
 * **GitHub Repository**: [https://github.com/RidhimaSharma11404/devpulse](https://github.com/RidhimaSharma11404/devpulse)
 
 ---
