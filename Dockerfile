@@ -11,8 +11,7 @@ WORKDIR /app
 COPY --from=build /app/target/devpulse-0.0.1-SNAPSHOT.jar app.jar
 
 # Create temp directory and install JDK tools inside the container (since the sandbox needs 'javac')
-# We need the full JDK in Stage 2 to compile code in the sandbox!
-RUN apk add --no-index openjdk21
+RUN apk add --no-cache openjdk21
 RUN mkdir temp && chmod 777 temp
 
 EXPOSE 8080
