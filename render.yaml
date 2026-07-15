@@ -3,4 +3,6 @@ services:
     name: devpulse
     env: docker
     plan: free
-    port: 8080
+    envVars:
+      - key: PORT
+        value: 8080
