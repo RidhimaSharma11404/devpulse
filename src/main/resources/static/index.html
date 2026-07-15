@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPulse - Developer Telemetry & Productivity Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Marked.js (Markdown parser) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">⚡</div>
+                <h1>Dev<span>Pulse</span></h1>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </button>
+                <button class="nav-item" data-tab="sandbox">
+                    <span class="icon">💻</span> Code Sandbox
+                </button>
+                <button class="nav-item" data-tab="copilot">
+                    <span class="icon">🧠</span> AI Co-Pilot
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <span class="icon">⚙️</span> Settings
+                </button>
+            </nav>
+            <div class="session-info">
+                <p class="session-label">Session ID</p>
+                <p id="display-session-id" class="session-value">Generating...</p>
+                <div class="status-indicator">
+                    <span class="dot pulse"></span>
+                    <span id="connection-status">Connecting WS...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- HEADER -->
+            <header class="content-header">
+                <div>
+                    <h2 id="tab-title">Developer Telemetry Dashboard</h2>
+                    <p class="tab-subtitle">Real-time developer performance & cognitive metrics</p>
+                </div>
+                <div class="header-actions">
+                    <button id="btn-start-session" class="btn btn-primary">Start New Session</button>
+                </div>
+            </header>
+
+            <!-- TAB: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-panel active">
+                <div class="metrics-grid">
+                    <!-- Metric 1: Coding Time -->
+                    <div class="metric-card">
+                        <div class="card-header">
+                            <span class="card-icon">⏱️</span>
+                            <span class="card-label">Active Coding Time</span>
+                        </div>
+                        <div class="card-value" id="val-active-time">0m 00s</div>
+                        <div class="card-footer text-success">
+                            <span>● Live monitoring</span>
+                        </div>
+                    </div>
+                    <!-- Metric 2: Keystroke/WPM -->
+                    <div class="metric-card">
+                        <div class="card-header">
+                            <span class="card-icon">⌨️</span>
+                            <span class="card-label">Typing Metrics</span>
+                        </div>
+                        <div class="card-value" id="val-typing-speed">0 <span class="unit">WPM</span></div>
+                        <div class="card-footer">
+                            <span id="val-total-keystrokes">Total keys: 0</span>
+                        </div>
+                    </div>
+                    <!-- Metric 3: Focus Level -->
+                    <div class="metric-card">
+                        <div class="card-header">
+                            <span class="card-icon">🧠</span>
+                            <span class="card-label">Focus State</span>
+                        </div>
+                        <div class="card-value" id="val-focus-level">Focus Mode</div>
+                        <div class="card-footer" id="val-focus-footer">
+                            <span class="badge focus-badge">Flow Active</span>
+                        </div>
+                    </div>
+                    <!-- Metric 4: Sandbox compiles -->
+                    <div class="metric-card">
+                        <div class="card-header">
+                            <span class="card-icon">⚡</span>
+                            <span class="card-label">Sandbox Executions</span>
+                        </div>
+                        <div class="card-value" id="val-compile-rate">0%</div>
+                        <div class="card-footer">
+                            <span id="val-compile-stats">Successful: 0 / 0 runs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Container -->
+                <div class="dashboard-charts">
+                    <div class="chart-card">
+                        <h3>Coding Velocity & Typing WPM Timeline</h3>
+                        <div class="chart-container">
+                            <canvas id="telemetryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CODE SANDBOX -->
+            <section id="tab-sandbox" class="tab-panel">
+                <div class="sandbox-container">
+                    <!-- Left Panel: Monaco Editor -->
+                    <div class="editor-panel">
+                        <div class="panel-header">
+                            <div class="selector-group">
+                                <span class="select-label">Language:</span>
+                                <select id="select-lang" class="custom-select">
+                                    <option value="java">Java 21</option>
+                                    <option value="javascript">JavaScript (Node)</option>
+                                </select>
+                            </div>
+                            <div class="button-group">
+                                <button id="btn-run-code" class="btn btn-accent">Run & Compile ⚡</button>
+                            </div>
+                        </div>
+                        <!-- Monaco container -->
+                        <div id="editor-container" class="editor-widget"></div>
+                    </div>
+
+                    <!-- Right Panel: Console output -->
+                    <div class="console-panel">
+                        <div class="panel-header">
+                            <h4>Terminal Console Output</h4>
+                            <span id="console-status-badge" class="badge">Idle</span>
+                        </div>
+                        <div class="console-output">
+                            <pre id="console-stdout">Welcome to the DevPulse Compile Sandbox.
+Select a language, write code in the editor, and click "Run & Compile".
+
+Key guidelines for SDE candidates:
+- For Java, keep class as "public class Main" containing your "public static void main(String[] args)" method.
+- Real-time keystrokes and typing metrics will be recorded as you type.</pre>
+                        </div>
+                        <div class="console-footer">
+                            <span id="run-time-display">Execution Time: -- ms</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: AI CO-PILOT -->
+            <section id="tab-copilot" class="tab-panel">
+                <div class="copilot-container">
+                    <!-- Left Panel: Daily Standup -->
+                    <div class="copilot-card">
+                        <div class="copilot-card-header">
+                            <div>
+                                <h3>Daily Standup Assistant</h3>
+                                <p class="card-desc">Synthesizes developer telemetry into standup notes</p>
+                            </div>
+                            <button id="btn-gen-standup" class="btn btn-primary">Generate Standup 🗓️</button>
+                        </div>
+                        <div class="copilot-result markdown-body" id="standup-output">
+                            <p class="placeholder-text">Click the button to process today's metrics and generate daily standup documentation.</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Static Code Analyzer -->
+                    <div class="copilot-card">
+                        <div class="copilot-card-header">
+                            <div>
+                                <h3>AI Code Complexity review</h3>
+                                <p class="card-desc">Checks file complexity and highlights clean code rules</p>
+                            </div>
+                            <button id="btn-analyze-code" class="btn btn-accent">Analyze Code Quality 🔍</button>
+                        </div>
+                        <div class="copilot-result markdown-body" id="analysis-output">
+                            <p class="placeholder-text">Click the button to scan your Monaco Editor sandbox code for potential code smells and design advice.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: SETTINGS -->
+            <section id="tab-settings" class="tab-panel">
+                <div class="settings-card">
+                    <h3>Environment Configuration</h3>
+                    <p class="card-desc">Configure external API integrations and workspace settings.</p>
+                    
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="openai-api-key">OpenAI API Key (Optional)</label>
+                            <input type="password" id="openai-api-key" placeholder="sk-..." class="form-input">
+                            <small class="form-help">Provide a valid OpenAI API key to enable GPT-4 powered standups and code reviews. If left blank, the app uses its robust local static analysis and heuristics engine.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Analytics Engine Status</label>
+                            <div class="status-box">
+                                <p><strong>Active Engine:</strong> <span id="active-engine-badge" class="badge badge-success">Local Heuristics Engine</span></p>
+                                <p><strong>Telemetry Database:</strong> <code>devpulse.db</code> (SQLite Relational DB)</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button id="btn-save-settings" class="btn btn-accent">Save Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- RequireJS for Monaco Editor Loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
