@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: devpulse
+    env: docker
+    plan: free
+    port: 8080
